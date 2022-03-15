@@ -30,10 +30,25 @@ public class GroupController {
         return groupRepository.findAll();
     }
 
+    @GetMapping("group/{id}")
+    public String getGroupName(@PathVariable int id)
+    {
+        Group temp = groupRepository.findByGroupID(id);
+        if(temp == null)
+        {
+            return "This group does not exist";
+        }
+        else
+        {
+            return temp.getGroupName();
+        }
+    }
+
     @PostMapping("/group/create")
     public String createGroup(@RequestBody Group group)
     {
-        if(groupRepository.findByGroupID(group.getGroupID()) == null)
+        Group temp = groupRepository.findByGroupID(group.getGroupID());
+        if(temp == null)
         {
             groupRepository.save(group);
             return "Group is created";
@@ -109,11 +124,11 @@ public class GroupController {
         return "Done";
     }
 
-    @GetMapping("group/{id}")
-    public Group findGroup(@PathVariable int id)
-    {
-        return groupRepository.findByGroupID(id);
-    }
+//    @GetMapping("group/{id}")
+//    public Group findGroup(@PathVariable int id)
+//    {
+//        return groupRepository.findByGroupID(id);
+//    }
 
     @PostMapping("group/{id}/message/add")
     public Group addMessage(@RequestBody Message message, @PathVariable int id)
@@ -201,21 +216,28 @@ public class GroupController {
         return temp;
     }
 
-    @PutMapping("group/{id}/event/update")
-    public List<Event> updateEvent(@PathVariable int id, @RequestBody Event event)
+    @PutMapping("group/{id}/event/update/{eventID}")
+    public List<Event> updateEvent(@PathVariable int id, @RequestBody Event event, @PathVariable int eventID)
     {
         if(groupRepository.findByGroupID(id) != null && groupRepository.findByGroupID(id).getEvents().size() != 0)
         {
             for(Event e : groupRepository.findByGroupID(id).getEvents())
             {
-                if(e.getCreatedBy() == event.getCreatedBy())
+//                if(e.getCreatedBy() == event.getCreatedBy())
+//                {
+//                    e.setEventName(event.getEventName());
+//                    e.setStartedAt(event.getStartedAt());
+//                    e.setEndedAt(event.getEndedAt());
+//                }
+                System.out.println(e.getEventID());
+                if(e.getEventID() == eventID)
                 {
                     e.setEventName(event.getEventName());
                     e.setStartedAt(event.getStartedAt());
                     e.setEndedAt(event.getEndedAt());
                 }
+                groupRepository.save(groupRepository.findByGroupID(id));
             }
-            groupRepository.save(groupRepository.findByGroupID(id));
             return groupRepository.findByGroupID(id).getEvents();
         }
         else
